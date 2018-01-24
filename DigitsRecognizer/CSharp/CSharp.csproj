@@ -42,7 +42,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BasicClassifier.cs" />
     <Compile Include="DataReader.cs" />
+    <Compile Include="IClassifier.cs" />
+    <Compile Include="IDistance.cs" />
+    <Compile Include="ManhattanDistance.cs" />
     <Compile Include="Observation.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
