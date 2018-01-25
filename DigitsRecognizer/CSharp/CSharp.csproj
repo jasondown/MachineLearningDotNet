@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="BasicClassifier.cs" />
     <Compile Include="DataReader.cs" />
+    <Compile Include="Evaluator.cs" />
     <Compile Include="IClassifier.cs" />
     <Compile Include="IDistance.cs" />
     <Compile Include="ManhattanDistance.cs" />
