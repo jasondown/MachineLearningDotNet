@@ -1,6 +1,7 @@
 ﻿open System.IO
 
 type Observation = { Label : string; Pixels : int[] }
+type Distance = int[] * int[] -> int
 
 let dataPath =  __SOURCE_DIRECTORY__ + @"..\..\Data"
 let trainingPath = dataPath + @"\trainingsample.csv"
@@ -15,15 +16,20 @@ let reader path =
     let data = File.ReadAllLines path
     data.[1..] |> Array.map toObservation
 
-let manhattanDistance pixels1 pixels2 =
+let manhattanDistance (pixels1, pixels2) =
     Array.zip pixels1 pixels2
     |> Array.map (fun (x,y) -> abs (x-y))
     |> Array.sum
 
-let train (trainingset : Observation []) =
+let euclideanDistance (pixels1, pixels2) =
+    Array.zip pixels1 pixels2
+    |> Array.map (fun (x,y) -> pown (x-y) 2)
+    |> Array.sum
+
+let train (trainingset : Observation []) (dist : Distance) =
     let classify (pixels : int[]) =
         trainingset
-        |> Array.minBy (fun x -> manhattanDistance x.Pixels pixels)
+        |> Array.minBy (fun x -> dist(x.Pixels, pixels))
         |> fun x -> x.Label
     classify
 
@@ -39,5 +45,12 @@ let evaluate validationSet classifier =
     |> fun x -> x*100.
     |> printfn "Correctly classified: %.2f%%"
 
-// Test
-evaluate validationData classifier
+// Test Manhattan Distance
+let manhattanClassifier = classifier manhattanDistance
+printfn "Manhattan"
+evaluate validationData manhattanClassifier
+
+// Test Euclidean Distance
+let euclideanClassifier = classifier euclideanDistance
+printfn "Euclidean"
+evaluate validationData euclideanClassifier
