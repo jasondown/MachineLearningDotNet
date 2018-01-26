@@ -45,12 +45,13 @@ let evaluate validationSet classifier =
     |> fun x -> x*100.
     |> printfn "Correctly classified: %.2f%%"
 
-// Test Manhattan Distance
 let manhattanClassifier = classifier manhattanDistance
+let euclideanClassifier = classifier euclideanDistance
+
+// Test Manhattan Distance
 printfn "Manhattan"
 evaluate validationData manhattanClassifier
 
 // Test Euclidean Distance
-let euclideanClassifier = classifier euclideanDistance
 printfn "Euclidean"
 evaluate validationData euclideanClassifier
