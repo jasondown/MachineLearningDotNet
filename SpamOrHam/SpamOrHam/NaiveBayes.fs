@@ -47,7 +47,7 @@ module Classifier =
         { Proprotion = groupProportion
           TokenFrequencies = scoredTokens }
 
-    let learn (docs : ('a * string) []) (tokenizer : Tokenizer) (classificationTokens : Token set) =
+    let learn (docs : ('a * string) []) (tokenizer : Tokenizer) (classificationTokens : Token Set) =
         let total = docs.Length
         docs
         |> Array.map (fun (label, docs) -> label, tokenizer docs)
