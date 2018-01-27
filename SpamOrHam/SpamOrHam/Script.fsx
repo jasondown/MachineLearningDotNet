@@ -1,8 +1,24 @@
-﻿// Learn more about F# at http://fsharp.org. See the 'F# Tutorial' project
-// for more guidance on F# programming.
+﻿open System.IO
 
-#load "Library1.fs"
-open SpamOrHam
+type DocType =
+    | Ham
+    | Spam
 
-// Define your library scripting code here
+let parseDocType (label : string) =
+    match label with
+    | "ham"     -> Ham
+    | "spam"    -> Spam
+    | _         -> failwith "Unknown label"
 
+let parseLine (line : string) =
+    let split = line.Split '\t'
+    let label = split.[0] |> parseDocType
+    let message = split.[1]
+    (label, message)
+
+let filename = "SMSSpamCollection"
+let path = __SOURCE_DIRECTORY__ + @"..\..\Data\" + filename
+
+let dataset =
+    File.ReadAllLines path
+    |> Array.map parseLine
