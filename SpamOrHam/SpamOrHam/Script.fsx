@@ -1,4 +1,5 @@
 ﻿open System.IO
+open System.Text.RegularExpressions
 
 type DocType =
     | Ham
@@ -22,6 +23,15 @@ let path = __SOURCE_DIRECTORY__ + @"..\..\Data\" + filename
 let dataset =
     File.ReadAllLines path
     |> Array.map parseLine
+
+let matchWords = Regex(@"\w+")
+
+let tokens (text : string) =
+    text.ToLowerInvariant()
+    |> matchWords.Matches
+    |> Seq.cast<Match>
+    |> Seq.map (fun m -> m.Value)
+    |> Set.ofSeq
 
 //----------------------------
 let spamWithFREE =
