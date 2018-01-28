@@ -51,6 +51,7 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
+    <None Include="NaiveBayes.fsx" />
     <Compile Include="NaiveBayes.fs" />
     <None Include="Script.fsx" />
     <Content Include="packages.config" />
