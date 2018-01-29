@@ -1,8 +1,8 @@
 ﻿#load "NaiveBayes.fs"
 open NaiveBayes.Classifier
-
 open System.IO
 open System.Text.RegularExpressions
+
 
 type DocType =
     | Ham
@@ -78,6 +78,9 @@ let topSpam = spam |> top (spamCount / 10) casedTokenizer
 
 let topTokens = Set.union topHam topSpam
 
+let commonTokens = Set.intersect topHam topSpam
+let specificTokens = Set.difference topTokens commonTokens
+
 let createClassifier (tokenizer : Tokenizer) (tokens : Token Set) =
     train training tokenizer tokens
 
@@ -86,6 +89,7 @@ let txtClassifier = createClassifier tokenizeWords (["txt"] |> set)
 let fullClassifier = createClassifier tokenizeWords alltokens
 let casedClassifier = createClassifier casedTokenizer casedTokens
 let topTokensCasedClassifier = createClassifier casedTokenizer topTokens
+let topTokensCasedCommonRemovedClassifier = createClassifier casedTokenizer specificTokens
 
 let validate (classifier : (string -> DocType)) (name : string) =
     validation
@@ -99,3 +103,4 @@ validate txtClassifier "txtClassifier"
 validate fullClassifier "fullClassifier"
 validate casedClassifier "casedClassifier"
 validate topTokensCasedClassifier "topTokensCasedClassifier"
+validate topTokensCasedCommonRemovedClassifier "topTokensCasedCommonRemovedClassifier"
