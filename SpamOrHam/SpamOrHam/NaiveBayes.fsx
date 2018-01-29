@@ -55,6 +55,29 @@ let casedTokens =
     |> Seq.map snd
     |> vocabulary casedTokenizer
 
+let top n (tokenizer : Tokenizer) (docs : string []) =
+    let tokenized = docs |> Array.map tokenizer
+    let tokens = tokenized |> Set.unionMany
+    tokens
+    |> Seq.sortBy (fun t -> - countIn tokenized t)
+    |> Seq. take n
+    |> Set.ofSeq
+
+let ham, spam =
+    let rawHam, rawSpam =
+        training
+        |> Array.partition (fun (lbl, _) -> lbl = Ham)
+    rawHam |> Array.map snd,
+    rawSpam |> Array.map snd
+
+let hamCount = ham |> vocabulary casedTokenizer |> Set.count
+let spamCount = spam |> vocabulary casedTokenizer |> Set.count
+
+let topHam = ham |> top (hamCount / 10) casedTokenizer
+let topSpam = spam |> top (spamCount / 10) casedTokenizer
+
+let topTokens = Set.union topHam topSpam
+
 let createClassifier (tokenizer : Tokenizer) (tokens : Token Set) =
     train training tokenizer tokens
 
@@ -62,6 +85,7 @@ let alwaysHamClassifier (_ : string) = Ham
 let txtClassifier = createClassifier tokenizeWords (["txt"] |> set)
 let fullClassifier = createClassifier tokenizeWords alltokens
 let casedClassifier = createClassifier casedTokenizer casedTokens
+let topTokensCasedClassifier = createClassifier casedTokenizer topTokens
 
 let validate (classifier : (string -> DocType)) (name : string) =
     validation
@@ -74,3 +98,4 @@ validate alwaysHamClassifier "alwaysHamClassifier"
 validate txtClassifier "txtClassifier"
 validate fullClassifier "fullClassifier"
 validate casedClassifier "casedClassifier"
+validate topTokensCasedClassifier "topTokensCasedClassifier"
