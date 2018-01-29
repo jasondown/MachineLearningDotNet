@@ -58,3 +58,8 @@ module Classifier =
     let train (docs : ('a * string) []) (tokenizer : Tokenizer) (classificationTokens : Token Set) =
         let groups = learn docs tokenizer classificationTokens
         classify groups tokenizer
+
+    let vocabulary (tokenizer : Tokenizer) (corpus : string seq) =
+        corpus
+        |> Seq.map tokenizer
+        |> Set.unionMany

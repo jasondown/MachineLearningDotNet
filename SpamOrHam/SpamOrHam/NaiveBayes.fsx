@@ -3,7 +3,6 @@ open NaiveBayes.Classifier
 
 open System.IO
 open System.Text.RegularExpressions
-open System.Web.UI.WebControls
 
 type DocType =
     | Ham
@@ -39,9 +38,25 @@ let tokenizeWords (text : string) =
 
 let validation, training = dataset.[..999], dataset.[1000..]
 
-let txtClassifier = train training tokenizeWords (["txt"] |> set)
+let alltokens =
+    training
+    |> Seq.map snd
+    |> vocabulary tokenizeWords
 
-validation
-|> Seq.averageBy (fun (doctType, sms) -> if doctType = txtClassifier sms then 1.0 else 0.0)
-|> fun x -> x*100.
-|> printfn "Based on 'txt', correctly classified: %.3f%%"
+let createClassifier (tokenizer : Tokenizer) (tokens : Token Set) =
+    train training tokenizer tokens
+
+let alwaysHamClassifier (_ : string) = Ham
+let txtClassifier = createClassifier tokenizeWords (["txt"] |> set)
+let fullClassifier = createClassifier tokenizeWords alltokens
+
+let validate (classifier : (string -> DocType)) (name : string) =
+    validation
+    |> Seq.averageBy (fun (doctType, sms) -> if doctType = classifier sms then 1.0 else 0.0)
+    |> fun x -> x*100.
+    |> printfn "Based on %s, correctly classified: %.3f%%" name
+
+// Compare classifiers
+validate alwaysHamClassifier "alwaysHamClassifier"
+validate txtClassifier "txtClassifier"
+validate fullClassifier "fullClassifier"
