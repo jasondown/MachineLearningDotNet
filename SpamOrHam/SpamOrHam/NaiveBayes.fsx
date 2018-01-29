@@ -29,6 +29,8 @@ let dataset =
 
 let matchWords = Regex(@"\w+")
 
+let validation, training = dataset.[..999], dataset.[1000..]
+
 let tokenizeWords (text : string) =
     text.ToLowerInvariant()
     |> matchWords.Matches
@@ -36,12 +38,22 @@ let tokenizeWords (text : string) =
     |> Seq.map (fun m -> m.Value)
     |> Set.ofSeq
 
-let validation, training = dataset.[..999], dataset.[1000..]
+let casedTokenizer (text : string) =
+    text
+    |> matchWords.Matches
+    |> Seq.cast<Match>
+    |> Seq.map (fun m -> m.Value)
+    |> Set.ofSeq
 
 let alltokens =
     training
     |> Seq.map snd
     |> vocabulary tokenizeWords
+
+let casedTokens =
+    training
+    |> Seq.map snd
+    |> vocabulary casedTokenizer
 
 let createClassifier (tokenizer : Tokenizer) (tokens : Token Set) =
     train training tokenizer tokens
@@ -49,6 +61,7 @@ let createClassifier (tokenizer : Tokenizer) (tokens : Token Set) =
 let alwaysHamClassifier (_ : string) = Ham
 let txtClassifier = createClassifier tokenizeWords (["txt"] |> set)
 let fullClassifier = createClassifier tokenizeWords alltokens
+let casedClassifier = createClassifier casedTokenizer casedTokens
 
 let validate (classifier : (string -> DocType)) (name : string) =
     validation
@@ -60,3 +73,4 @@ let validate (classifier : (string -> DocType)) (name : string) =
 validate alwaysHamClassifier "alwaysHamClassifier"
 validate txtClassifier "txtClassifier"
 validate fullClassifier "fullClassifier"
+validate casedClassifier "casedClassifier"
