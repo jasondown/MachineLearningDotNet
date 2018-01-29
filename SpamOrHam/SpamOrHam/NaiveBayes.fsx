@@ -95,7 +95,7 @@ let validate (classifier : (string -> DocType)) (name : string) =
     validation
     |> Seq.averageBy (fun (doctType, sms) -> if doctType = classifier sms then 1.0 else 0.0)
     |> fun x -> x*100.
-    |> printfn "Based on %s, correctly classified: %.3f%%" name
+    |> printfn "Based on %s, correctly classified: %.2f%%" name
 
 // Compare classifiers
 validate alwaysHamClassifier "alwaysHamClassifier"
