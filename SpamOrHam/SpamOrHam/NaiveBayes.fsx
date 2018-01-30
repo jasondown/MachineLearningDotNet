@@ -129,18 +129,23 @@ let validate (classifier : (string -> DocType)) (name : string) =
     |> printfn "Based on %s, correctly classified: %.2f%%" name
 
 let betterValidation (classifier : (string -> DocType)) (name : string) =
-    validation
-    |> Seq.filter (fun (docType, _) -> docType = Ham)
-    |> Seq.averageBy (fun (docType, sms) ->
-        if docType = classifier sms then 1.0 else 0.0)
-    |> fun x -> x*100.
-    |> printfn "Based on %s, correctly classified Ham: %.2f%%" name
-    validation
-    |> Seq.filter (fun (docType, _) -> docType = Spam)
-    |> Seq.averageBy (fun (docType, sms) ->
-        if docType = classifier sms then 1.0 else 0.0)
-    |> fun x -> x*100.
-    |> printfn "Based on %s, correctly classified Spam: %.2f%%" name
+    let hamAccuracy, falsePositive =
+        validation
+        |> Seq.filter (fun (docType, _) -> docType = Ham)
+        |> Seq.averageBy (fun (docType, sms) ->
+            if docType = classifier sms then 1.0 else 0.0)
+        |> fun x -> x*100.
+        |> fun x -> (x, 100. - x)
+    printfn "Based on %s, correctly classified Ham: %.2f%% (fp: %.2f%%)" name hamAccuracy falsePositive
+    
+    let spamAccuracy, falseNegative =
+        validation
+        |> Seq.filter (fun (docType, _) -> docType = Spam)
+        |> Seq.averageBy (fun (docType, sms) ->
+            if docType = classifier sms then 1.0 else 0.0)
+        |> fun x -> x*100.
+        |> fun x -> (x, 100. - x)
+    printfn "Based on %s, correctly classified Spam: %.2f%% (fn: %.2f%%)" name spamAccuracy falseNegative
     printfn "-----" |> ignore
 
 // Compare classifiers ... Gotta be a better way to get the name
