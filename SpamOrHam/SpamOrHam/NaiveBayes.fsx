@@ -128,11 +128,26 @@ let validate (classifier : (string -> DocType)) (name : string) =
     |> fun x -> x*100.
     |> printfn "Based on %s, correctly classified: %.2f%%" name
 
-// Compare classifiers
-validate alwaysHamClassifier "alwaysHamClassifier"
-validate txtClassifier "txtClassifier"
-validate fullClassifier "fullClassifier"
-validate casedClassifier "casedClassifier"
-validate topTokensCasedClassifier "topTokensCasedClassifier"
-validate topTokensCasedCommonRemovedClassifier "topTokensCasedCommonRemovedClassifier"
-validate smartTokensCasedClassifier "smartTokensCasedClassifier"
+let betterValidation (classifier : (string -> DocType)) (name : string) =
+    validation
+    |> Seq.filter (fun (docType, _) -> docType = Ham)
+    |> Seq.averageBy (fun (docType, sms) ->
+        if docType = classifier sms then 1.0 else 0.0)
+    |> fun x -> x*100.
+    |> printfn "Based on %s, correctly classified Ham: %.2f%%" name
+    validation
+    |> Seq.filter (fun (docType, _) -> docType = Spam)
+    |> Seq.averageBy (fun (docType, sms) ->
+        if docType = classifier sms then 1.0 else 0.0)
+    |> fun x -> x*100.
+    |> printfn "Based on %s, correctly classified Spam: %.2f%%" name
+    printfn "-----" |> ignore
+
+// Compare classifiers ... Gotta be a better way to get the name
+betterValidation alwaysHamClassifier "alwaysHamClassifier"
+betterValidation txtClassifier "txtClassifier"
+betterValidation fullClassifier "fullClassifier"
+betterValidation casedClassifier "casedClassifier"
+betterValidation topTokensCasedClassifier "topTokensCasedClassifier"
+betterValidation topTokensCasedCommonRemovedClassifier "topTokensCasedCommonRemovedClassifier"
+betterValidation smartTokensCasedClassifier "smartTokensCasedClassifier"
