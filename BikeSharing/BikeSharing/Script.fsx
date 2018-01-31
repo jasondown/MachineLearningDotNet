@@ -24,7 +24,10 @@ let movingAvg n (series : float seq) =
     |> Seq.toList
 
 Chart.Combine [
-    Chart.Line count
-    Chart.Line (movingAvg 7 count)
-    Chart.Line (movingAvg 30 count) ]
+    Chart.Line count |> Chart.WithStyling (Name = "Daily Count", Color = System.Drawing.Color.Green)
+    Chart.Line (movingAvg 7 count) |> Chart.WithStyling (Name = "7 Day Moving Avg", Color = System.Drawing.Color.Blue)
+    Chart.Line (movingAvg 30 count) |> Chart.WithStyling (Name = "30 Day Moving Avg", Color = System.Drawing.Color.Red) ]
+    |> Chart.WithLegend (Title = "Legend")
+    |> Chart.WithXAxis (Title = "Day Number")
+    |> Chart.WithYAxis (Title = "Bikes Used")
     |> Chart.Show
