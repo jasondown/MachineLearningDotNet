@@ -51,3 +51,14 @@ Chart.Combine [
     Chart.Line [ for obs in data -> model1 obs ] |> Chart.WithStyling (Name = "Model 1") ]
     |> Chart.WithLegend (Title = "Legend")
     |> Chart.Show
+
+type Model = Obs -> float
+
+let cost (data : Obs seq) (m : Model) =
+    data
+    |> Seq.sumBy (fun x -> pown (float x.Cnt - m x) 2)
+    |> sqrt
+
+let overallCost = cost data
+overallCost model0 |> printfn "Cost model0: %.0f"
+overallCost model1 |> printfn "Cost model1: %.0f"
