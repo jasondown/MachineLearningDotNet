@@ -4,6 +4,8 @@
 
 open FSharp.Data
 open FSharp.Charting
+open System.Web.UI.WebControls
+open System.Drawing
 
 type Data = CsvProvider<"day.csv">
 let dataset = Data.GetSample()
@@ -46,7 +48,7 @@ let model0 = model (avg, 0.)
 let model1 = model (6000., -4.5)
 
 Chart.Combine [
-    Chart.Line count
+    Chart.Line count |> Chart.WithStyling (Name = "Usage")
     Chart.Line [ for obs in data -> model0 obs ] |> Chart.WithStyling (Name = "Model 0")
     Chart.Line [ for obs in data -> model1 obs ] |> Chart.WithStyling (Name = "Model 1") ]
     |> Chart.WithLegend (Title = "Legend")
@@ -123,5 +125,10 @@ let batchedError rate =
         Some(err, (t0', t1'))) (0.0, 0.0)
     |> Seq.take 100
     |> Seq.toList
-    |> Chart.Line
+    |> Chart.Line |> Chart.WithTitle (Text = "Step-by-Step Error via Batch Gradient Descent", 
+                                      Color = System.Drawing.Color.Red,
+                                      FontStyle = System.Drawing.FontStyle.Bold,
+                                      FontSize = 20.)
     |> Chart.Show
+
+batchedError 0.000001
