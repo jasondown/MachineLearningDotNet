@@ -31,3 +31,23 @@ Chart.Combine [
     |> Chart.WithXAxis (Title = "Day Number")
     |> Chart.WithYAxis (Title = "Bikes Used")
     |> Chart.Show
+
+let avg = data |> Seq.averageBy (fun x -> float x.Cnt)
+
+let baseline = data |> Seq.averageBy (fun x -> abs (float x.Cnt - avg))
+
+type Obs = Data.Row
+
+let model (theta0, theta1) (obs : Obs) =
+    theta0 + theta1 * (float obs.Instant)
+
+//---------- Testing a linear combination
+let model0 = model (avg, 0.)
+let model1 = model (6000., -4.5)
+
+Chart.Combine [
+    Chart.Line count
+    Chart.Line [ for obs in data -> model0 obs ] |> Chart.WithStyling (Name = "Model 0")
+    Chart.Line [ for obs in data -> model1 obs ] |> Chart.WithStyling (Name = "Model 1") ]
+    |> Chart.WithLegend (Title = "Legend")
+    |> Chart.Show
