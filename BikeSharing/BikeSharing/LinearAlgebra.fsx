@@ -44,3 +44,38 @@ cost theta Y X
 
 let estimate (Y : Vec) (X : Mat) =
     (X.Transpose() * X).Inverse() * X.Transpose() * Y
+
+#time
+let theta_normal = (X.Transpose() * X).Inverse() * X.Transpose() * Y
+#time
+
+//----------Testing MKL
+System.Environment.CurrentDirectory <- __SOURCE_DIRECTORY__
+
+open MathNet.Numerics
+open MathNet.Numerics.Providers.LinearAlgebra.Mkl
+
+// Shuffle to prevent seasonal data bias
+let seed = 314159
+let rng = System.Random(seed)
+
+// Fisher-Yates shuffle
+let shuffle (arr : 'a []) =
+    let arr = Array.copy arr
+    let l = arr.Length 
+    for i in (l-1) .. -1 .. 1 do
+        let temp = arr.[i]
+        let j = rng.Next(0, i+1)
+        arr.[i] <- arr.[j]
+        arr.[j] <- temp
+    arr
+
+let training, validation =
+    let shuffled =
+        data
+        |> Seq.toArray
+        |> shuffle
+    let size = 
+        0.7 * float (Array.length shuffled) |> int
+    shuffled.[..size],
+    shuffled.[size+1..]
