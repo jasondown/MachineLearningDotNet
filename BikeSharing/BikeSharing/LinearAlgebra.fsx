@@ -79,3 +79,73 @@ let training, validation =
         0.7 * float (Array.length shuffled) |> int
     shuffled.[..size],
     shuffled.[size+1..]
+
+type Obs = Data.Row
+type Model = Obs -> float
+type Featurizer = Obs -> float list
+
+let predictor (f : Featurizer) (theta : Vec) =
+    f >> vector >> (*) theta
+
+let evaluate (model : Model) (data : Obs seq) =
+    data
+    |> Seq.averageBy (fun obs -> abs (model obs - float obs.Cnt))
+
+let model (f : Featurizer) (data : Obs seq) =
+    let Yt, Xt =
+        data
+        |> Seq.toList
+        |> List.map (fun obs -> float obs.Cnt, f obs)
+        |> List.unzip
+    let theta = estimate (vector Yt) (matrix Xt)
+    let predict = predictor f theta 
+    theta, predict
+
+let featurizer0 (obs : Obs) =
+    [ 1.; float obs.Instant; ]
+
+let (theta0, model0) = model featurizer0 training
+
+// Evaluate the quality of our model0 on the training and validation sets
+evaluate model0 training |> printfn "Training: %.0f"
+evaluate model0 validation |> printfn "Validation: %.0f"
+Chart.Combine [
+    Chart.Line [ for obs in data -> float obs.Cnt ]
+    Chart.Line [ for obs in data -> model0 obs ] ]
+    |> Chart.Show
+
+//----------Add some features to our model
+let featurizer1 (obs : Obs) =
+    [ 1.
+      obs.Instant   |> float
+      obs.Atemp     |> float
+      obs.Hum       |> float
+      obs.Temp      |> float
+      obs.Windspeed |> float
+    ]
+
+let (theta1, model1) = model featurizer1 training
+
+evaluate model1 training |> printfn "Training: %.0f"
+evaluate model1 validation |> printfn "Validation: %.0f"
+
+Chart.Combine [
+    Chart.Line [ for obs in data -> float obs.Cnt ] |> Chart.WithStyling (Name = "Daily Count")
+    Chart.Line [ for obs in data -> model0 obs ]    |> Chart.WithStyling (Name = "Model0 - 1 Feature")
+    Chart.Line [ for obs in data -> model1 obs ]    |> Chart.WithStyling (Name = "Model1 - 5 Features")
+]   |> Chart.WithLegend (Title = "Legend")
+    |> Chart.WithTitle (Text = "Using Linear Algebra For Prediction", 
+                        Color = System.Drawing.Color.Red,
+                        FontStyle = System.Drawing.FontStyle.Bold,
+                        FontSize = 20.)
+    |> Chart.Show
+
+Chart.Combine [
+    Chart.Point [ for obs in data -> float obs.Cnt, model0 obs ] |> Chart.WithStyling (Name = "Model0 - 1 Feature")
+    Chart.Point [ for obs in data -> float obs.Cnt, model1 obs ] |> Chart.WithStyling (Name = "Model1 - 5 Features", Color = System.Drawing.Color.Red)
+]   |> Chart.WithLegend (Title = "Legend")
+    |> Chart.WithTitle (Text = "Prediction VS Actual Scatter Plot", 
+                        Color = System.Drawing.Color.Red,
+                        FontStyle = System.Drawing.FontStyle.Bold,
+                        FontSize = 16.)
+    |> Chart.Show
