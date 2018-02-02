@@ -11,3 +11,9 @@ open MathNet.Numerics.LinearAlgebra
 open MathNet.Numerics.LinearAlgebra.Double
 
 let A = vector [ 1.; 2.; 3. ]
+let B = matrix [ [ 1.; 2. ]
+                 [ 3.; 4. ]
+                 [ 5.; 6. ] ]
+let C = A * A
+let D = A * B
+let E = A * B.Column(1)
