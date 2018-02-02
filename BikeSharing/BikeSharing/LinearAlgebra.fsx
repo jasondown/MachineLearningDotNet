@@ -10,6 +10,7 @@ open MathNet
 open MathNet.Numerics.LinearAlgebra
 open MathNet.Numerics.LinearAlgebra.Double
 
+//---------- Playing with vectors and matrices
 let A = vector [ 1.; 2.; 3. ]
 let B = matrix [ [ 1.; 2. ]
                  [ 3.; 4. ]
@@ -17,3 +18,29 @@ let B = matrix [ [ 1.; 2. ]
 let C = A * A
 let D = A * B
 let E = A * B.Column(1)
+
+
+//---------- Doing same calculations as in script.fsx, but with nicer linear algebra calculations.
+type Data = CsvProvider<"day.csv">
+let dataset = Data.Load("day.csv")
+let data = dataset.Rows
+
+type Vec = Vector<float>
+type Mat = Matrix<float>
+
+let cost (theta : Vec) (Y : Vec) (X : Mat) =
+    let ps = Y - (theta * X.Transpose())
+    ps * ps |> sqrt
+
+let predict (theta : Vec) (v: Vec) = theta * v
+
+let X = matrix [ for obs in data -> [ 1.; float obs.Instant ]]
+let Y = vector [ for obs in data -> float obs.Cnt ]
+
+let theta = vector [6000.; -4.5]
+
+predict theta (X.Row(0))
+cost theta Y X
+
+let estimate (Y : Vec) (X : Mat) =
+    (X.Transpose() * X).Inverse() * X.Transpose() * Y
