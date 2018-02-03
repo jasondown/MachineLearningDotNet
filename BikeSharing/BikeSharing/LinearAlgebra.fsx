@@ -149,3 +149,50 @@ Chart.Combine [
                         FontStyle = System.Drawing.FontStyle.Bold,
                         FontSize = 16.)
     |> Chart.Show
+
+//---------- Handling Categorical Features
+let featurizer2 (obs : Obs) =
+    [ 1.
+      obs.Instant   |> float
+      obs.Hum       |> float
+      obs.Temp      |> float
+      obs.Windspeed |> float
+      // Using Sunday as a reference and avoid collinearity problem (if obs.Weekday = 0 then 1.0 else 0.0)
+      (if obs.Weekday = 1 then 1.0 else 0.0)
+      (if obs.Weekday = 2 then 1.0 else 0.0)
+      (if obs.Weekday = 3 then 1.0 else 0.0)
+      (if obs.Weekday = 4 then 1.0 else 0.0)
+      (if obs.Weekday = 5 then 1.0 else 0.0)
+      (if obs.Weekday = 6 then 1.0 else 0.0)
+    ]
+
+let (theta2, model2) = model featurizer2 training
+
+evaluate model2 training |> printfn "Training: %.0f"
+evaluate model2 validation |> printfn "Validation: %.0f"
+
+Chart.Combine [
+    Chart.Line [ for obs in data -> float obs.Cnt ] |> Chart.WithStyling (Name = "Daily Count")
+    Chart.Line [ for obs in data -> model0 obs ]    |> Chart.WithStyling (Name = "Model0 - 1 Feature")
+    Chart.Line [ for obs in data -> model1 obs ]    |> Chart.WithStyling (Name = "Model1 - 5 Features")
+    Chart.Line [ for obs in data -> model2 obs ]    |> Chart.WithStyling (Name = "Model1 - 5 Features + Days")
+]   |> Chart.WithLegend (Title = "Legend")
+    |> Chart.WithTitle (Text = "Using Linear Algebra For Prediction", 
+                        Color = System.Drawing.Color.Red,
+                        FontStyle = System.Drawing.FontStyle.Bold,
+                        FontSize = 20.)
+    |> Chart.Show
+
+Chart.Combine [
+    //Chart.Point [ for obs in data -> float obs.Cnt, model0 obs ] |> Chart.WithStyling (Name = "Model0 - 1 Feature")
+    Chart.Point [ for obs in data -> float obs.Cnt, model1 obs ] |> Chart.WithStyling (Name = "Model1 - 5 Features", Color = System.Drawing.Color.Red)
+    Chart.Point [ for obs in data -> float obs.Cnt, model2 obs ] |> Chart.WithStyling (Name = "Model2 - 5 Features + Days", Color = System.Drawing.Color.Blue)
+]   |> Chart.WithLegend (Title = "Legend")
+    |> Chart.WithTitle (Text = "Prediction VS Actual Scatter Plot", 
+                        Color = System.Drawing.Color.Red,
+                        FontStyle = System.Drawing.FontStyle.Bold,
+                        FontSize = 16.)
+    |> Chart.Show
+
+//---------- Bicycle usage against temperature usage scatterplot
+Chart.Point [ for obs in data -> obs.Temp, obs.Cnt ] |> Chart.Show
