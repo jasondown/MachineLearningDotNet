@@ -211,7 +211,8 @@ let (_, squareTempModel) = model squareTempFeaturizer data
 Chart.Combine [
     Chart.Point [ for obs in data -> obs.Temp, obs.Cnt ]
     Chart.Point [ for obs in data -> obs.Temp, squareTempModel obs ]
-] |> Chart.Show
+]   |> Chart.WithTitle (Text = "Bikes Used VS Normalized Temperature")
+    |> Chart.Show
 
 let featurizer3 (obs : Obs) =
     [ 1.
@@ -232,3 +233,14 @@ let featurizer3 (obs : Obs) =
 let (theta3, model3) = model featurizer3 training
 evaluate model3 training |> printEvalTraining
 evaluate model3 validation |> printEvalValidation
+
+Chart.Combine [
+    //Chart.Point [ for obs in data -> float obs.Cnt, model0 obs ] |> Chart.WithStyling (Name = "Model0 - 1 Feature")
+    Chart.Point [ for obs in data -> float obs.Cnt, model1 obs ] |> Chart.WithStyling (Name = "Model1 - 5 Features", Color = System.Drawing.Color.Red)
+    Chart.Point [ for obs in data -> float obs.Cnt, model3 obs ] |> Chart.WithStyling (Name = "Model3 - 5 Features + Days + temp polynomial", Color = System.Drawing.Color.Blue)
+]   |> Chart.WithLegend (Title = "Legend")
+    |> Chart.WithTitle (Text = "Prediction VS Actual Scatter Plot", 
+                        Color = System.Drawing.Color.Red,
+                        FontStyle = System.Drawing.FontStyle.Bold,
+                        FontSize = 16.)
+    |> Chart.Show
