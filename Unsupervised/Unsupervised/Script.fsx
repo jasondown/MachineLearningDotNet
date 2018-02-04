@@ -121,7 +121,7 @@ Chart.Combine [
 ]   |> Chart.WithXAxis (LabelStyle = labels)
     |> Chart.Show
 
-//----------Radial Sum of Square (RSS) and Akaike Information Criterion (AIC)
+//----------Residual Sum of Square (RSS) and Akaike Information Criterion (AIC)
 let ruleOfThumb (n : int) = sqrt (float n/2.)
 let k_ruleOfThumb = ruleOfThumb observations2.Length
 
@@ -143,7 +143,7 @@ let AIC (dataset : Observation []) centroids =
     RSS dataset centroids + float (2 * m * k)
 
 //Figure out good value for K
-[1..25]
+[1..20]
 |> Seq.map (fun k ->
     let value =
         [ for _ in 1 .. 10 ->
@@ -156,3 +156,29 @@ let AIC (dataset : Observation []) centroids =
 |> Chart.Line
 |> Chart.WithTitle (Text = "K-Minimizing AIC", FontStyle = FontStyle.Bold, Color = Color.Red, FontSize = 20.)
 |> Chart.Show
+
+//----------Using K value discovered from RSS and AIC
+let (bestclusters, bestClassifier) =
+    let clustering = clusterize distance centroidOf
+    let k = 10
+    seq { 
+        for _ in 1 .. 20 ->
+            clustering observations2 k
+    }
+    |> Seq.minBy (fun (cs, f) ->
+        RSS observations2 (cs |> Seq.map snd))
+
+bestclusters
+|> Seq.iter (fun (id, profile) ->
+    printfn "CLUSTER %i" id
+    profile
+    |> Array.iteri (fun i value ->
+        if value > 0.2 then printfn "%16s %.1f" headers.[i] value))
+
+Chart.Combine [
+    for (id, profile) in bestclusters ->
+        profile
+        |> Seq.mapi (fun i value -> headers.[i], value)
+        |> Chart.Bar
+]   |> Chart.WithXAxis (LabelStyle = labels)
+    |> Chart.Show
