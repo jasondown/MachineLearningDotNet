@@ -24,3 +24,36 @@ module KMeans =
             |> Array.map (fun x -> 0, x)
 
         assignments, centroids
+
+    let clusterize distance centroidOf observations k =
+        let rec search (assignments, centroids) =
+            let classifier observation = 
+                centroids
+                |> Array.minBy (fun (_, centroid) ->
+                    distance observation centroid)
+                |> fst
+
+            let assignments' =
+                assignments
+                |> Array.map (fun (_, observation) ->
+                    let closestCentroidId = classifier observation
+                    (closestCentroidId, observation))
+
+            let changed =
+                (assignments, assignments')
+                ||> Seq.zip
+                |> Seq.exists (fun ((oldClusterID, _), (newClusterID, _)) ->
+                    not (oldClusterID = newClusterID))
+
+            if changed then
+                let centroids' =
+                    assignments'
+                    |> Seq.groupBy fst
+                    |> Seq.map (fun (clusterID, group) ->
+                        clusterID, group |> Seq.map snd |> centroidOf)
+                    |> Seq.toArray
+                search (assignments', centroids')
+            else centroids, classifier
+
+        let initialValues = initialize observations k
+        search initialValues
