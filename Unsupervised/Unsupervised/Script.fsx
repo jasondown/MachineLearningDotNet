@@ -1,4 +1,5 @@
-﻿open System
+﻿
+open System
 open System.IO
 
 let folder = __SOURCE_DIRECTORY__
@@ -26,3 +27,20 @@ headers
     let min = col |> Array.min
     let max = col |> Array.max
     printfn "%16s %8.1f %8.1f %8.1f" name avg min max)
+
+//---------- Add charting referernces
+#I @"..\packages\"
+#r @"FSharp.Charting.0.91.1\lib\net45\FSharp.Charting.dll"
+open FSharp.Charting
+open System.Drawing
+
+let labels = ChartTypes.LabelStyle(Interval = 0.25)
+headers
+|> Seq.mapi (fun i name ->
+    name,
+    observations
+    |> Seq.averageBy (fun obs -> obs.[i]))
+|> Chart.Bar
+|> Chart.WithTitle (Text = "Average Usage by Tag", FontStyle = FontStyle.Bold, Color = Color.Red, FontSize = 20.)
+|> Chart.WithXAxis (LabelStyle = labels)
+|> Chart.Show
