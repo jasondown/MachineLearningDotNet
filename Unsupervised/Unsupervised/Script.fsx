@@ -15,3 +15,14 @@ let headers, observations =
         |> Array.map (Array.map float)
 
     headers, observations
+
+//---------- Basic dataset statistics
+printfn "%16s %8s %8s %8s" "Tag name" "Avg" "Min" "Max"
+
+headers
+|> Array.iteri (fun i name ->
+    let col = observations |> Array.map (fun obs -> obs.[i])
+    let avg = col |> Array.average
+    let min = col |> Array.min
+    let max = col |> Array.max
+    printfn "%16s %8.1f %8.1f %8.1f" name avg min max)
