@@ -12,7 +12,7 @@ module KMeans =
         pick Set.empty |> Set.toArray
 
     let initialize observations k = 
-        let size = Array.last observations
+        let size = Array.length observations
 
         let centroids = 
             pickFrom size k
