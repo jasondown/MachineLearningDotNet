@@ -41,3 +41,23 @@ let correlated =
     |> Seq.take 20
     |> Seq.iter (fun (corr, f1, f2) ->
         printfn "%s %s : %.2f" f1 f2 corr)
+
+//----------Applying PCA to StackOverflow dataset
+#load "PCA.fs"
+open Unsupervised.PCA
+open MathNet.Numerics.Statistics.Statistics
+
+let normalized = normalize (headers.Length) observations
+let (eValues, eVectors), projector = pca normalized
+
+//----------Feature weight analysis
+let total = eValues |> Seq.sumBy (fun x -> x.Magnitude)
+eValues
+|> Vector.toList
+|> List.rev
+|> List.scan (fun (percent, acc) value ->
+    let percent = 100. * value.Magnitude / total
+    let acc = acc + percent
+    (percent, acc)) (0., 0.)
+|> List.tail
+|> List.iteri (fun i (p, c) -> printfn "Feature: %2i: %.2f%% (%.2f%%)" i p c)
