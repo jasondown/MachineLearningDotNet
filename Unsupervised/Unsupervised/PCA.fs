@@ -37,3 +37,19 @@ module PCA =
             row
             |> Array.mapi (fun i x ->
                 (float x - averages.[i]) / stdDevs.[i]))
+
+    let pca (observations : float [][]) =
+        let factorization =
+            observations
+            |> Matrix.Build.DenseOfRowArrays
+            |> covarianceMatrix
+            |> Matrix.eigen
+
+        let eigenValues = factorization.EigenValues
+        let eigenVectors = factorization.EigenVectors
+
+        let projector (obs : float []) =
+            let obsVector = obs |> Vector.Build.DenseOfArray
+            (eigenVectors.Transpose () * obsVector)
+            |> Vector.toArray
+        (eigenValues, eigenVectors), projector
