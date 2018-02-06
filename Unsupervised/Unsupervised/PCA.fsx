@@ -1,10 +1,13 @@
 ﻿#I @"..\packages"
 #r @"MathNet.Numerics.3.20.2\lib\net40\MathNet.Numerics.dll"
 #r @"MathNet.Numerics.FSharp.3.20.2\lib\net40\MathNet.Numerics.FSharp.dll"
+#r @"FSharp.Charting.0.91.1\lib\net45\FSharp.Charting.dll"
 
 open MathNet
 open MathNet.Numerics.LinearAlgebra
 open MathNet.Numerics.Statistics
+open FSharp.Charting
+open FSharp.Charting.ChartTypes
 
 open System
 open System.IO
@@ -46,6 +49,7 @@ let correlated =
 #load "PCA.fs"
 open Unsupervised.PCA
 open MathNet.Numerics.Statistics.Statistics
+open FSharp.Charting.ChartTypes
 
 let normalized = normalize (headers.Length) observations
 let (eValues, eVectors), projector = pca normalized
@@ -61,3 +65,39 @@ eValues
     (percent, acc)) (0., 0.)
 |> List.tail
 |> List.iteri (fun i (p, c) -> printfn "Feature: %2i: %.2f%% (%.2f%%)" i p c)
+
+// Plotting original features against extracted components
+let principalComponent comp1 comp2 =
+    let title = sprintf "Component %i vs %i" comp1 comp2
+    let features = headers.Length
+    let coords = Seq.zip (eVectors.Column(features-comp1)) (eVectors.Column(features-comp2))
+    Chart.Point (coords, Title = title, Labels = headers, MarkerSize = 7)
+    |> Chart.WithXAxis (
+        Min = -1.0, 
+        Max = 1.0, 
+        LabelStyle = ChartTypes.LabelStyle (Interval = 0.25))
+    |> Chart.WithYAxis (
+        Min = -1.0, 
+        Max = 1.0, 
+        LabelStyle = ChartTypes.LabelStyle (Interval = 0.25))
+    |> Chart.Show
+
+//---------- Plotting observations against the principal components
+let projections comp1 comp2 =
+    let title = sprintf "Component %i vs %i" comp1 comp2
+    let features = headers.Length
+    let coords =
+        normalized
+        |> Seq.map projector
+        |> Seq.map (fun obs -> obs.[features-comp1], obs.[features-comp2])
+    Chart.Point (coords, Title = title)
+    |> Chart.WithXAxis (
+        Min = -200., 
+        Max = 500., 
+        LabelStyle = ChartTypes.LabelStyle (Interval = 100.))
+    |> Chart.WithYAxis (
+        Min = -200., 
+        Max = 500., 
+        LabelStyle = ChartTypes.LabelStyle (Interval = 100.))
+    |> Chart.Show
+    
