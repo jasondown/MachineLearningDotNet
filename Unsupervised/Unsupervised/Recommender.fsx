@@ -42,3 +42,20 @@ let weights (values : float []) =
     let total = values |> Array.sum
     values
     |> Array.map (fun x -> x / total)
+
+//----------Computing tag predictions for a user
+let predict (row : float []) =
+    let known, unknown = row |> split
+    let similarities =
+        train
+        |> Array.map (fun example ->
+            let common, _ = example |> split
+            similarity known common)
+        |> weights
+    [| for i in 20 .. 20 ->
+        let column = train |> Array.map (fun x -> x.[i])
+        let prediction =
+            (similarities, column)
+            ||> Array.map2 (fun s v -> s * v)
+            |> Array.sum
+        prediction |]
