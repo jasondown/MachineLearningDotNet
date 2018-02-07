@@ -13,6 +13,7 @@ let headers, observations =
         raw.[1..]
         |> Array.map (fun line -> (line.Split ',').[1..])
         |> Array.map (Array.map float)
+        |> Array.filter (fun row -> (row |> Array.sum) > 0.)
 
     headers, observations
 
@@ -52,10 +53,15 @@ let predict (row : float []) =
             let common, _ = example |> split
             similarity known common)
         |> weights
-    [| for i in 20 .. 20 ->
+    [| for i in 20 .. 29 ->
         let column = train |> Array.map (fun x -> x.[i])
         let prediction =
             (similarities, column)
             ||> Array.map2 (fun s v -> s * v)
             |> Array.sum
         prediction |]
+
+//----------Test it out!
+let targetTags = headers.[20..]
+predict test.[0] |> Array.zip targetTags
+test.[0] |> split |> snd
