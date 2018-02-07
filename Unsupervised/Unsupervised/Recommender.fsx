@@ -34,3 +34,6 @@ let distance (row1 : float []) (row2 : float []) =
 
 let similarity (row1 : float []) (row2 : float []) =
     1. / (1. + distance row1 row2)
+
+let split (row : float []) =
+    row.[..19], row.[20..]
