@@ -37,3 +37,8 @@ let similarity (row1 : float []) (row2 : float []) =
 
 let split (row : float []) =
     row.[..19], row.[20..]
+
+let weights (values : float []) =
+    let total = values |> Array.sum
+    values
+    |> Array.map (fun x -> x / total)
