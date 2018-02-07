@@ -25,3 +25,9 @@ let scale (row : float []) =
 
 let test = observations.[..99] |> Array.map scale
 let train = observations.[100..] |> Array.map scale
+
+//----------Helper functions
+let distance (row1 : float []) (row2 : float []) =
+    (row1, row2)
+    ||> Array.map2 (fun x y -> pown (x - y) 2)
+    |> Array.sum
