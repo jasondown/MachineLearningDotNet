@@ -56,6 +56,7 @@
     <None Include="PCA.fsx" />
     <Compile Include="KMeans.fs" />
     <None Include="Script.fsx" />
+    <None Include="Recommender.fsx" />
     <Content Include="packages.config" />
     <Content Include="userprofiles-toptags.txt" />
   </ItemGroup>
