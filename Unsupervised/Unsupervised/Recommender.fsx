@@ -15,3 +15,13 @@ let headers, observations =
         |> Array.map (Array.map float)
 
     headers, observations
+
+//----------Prepare the dataset
+let scale (row : float []) =
+    let min = row |> Array.min
+    let max = row |> Array.max
+    if min = max then row
+    else row |> Array.map (fun x -> (x - min) / (max - min))
+
+let test = observations.[..99] |> Array.map scale
+let train = observations.[100..] |> Array.map scale
