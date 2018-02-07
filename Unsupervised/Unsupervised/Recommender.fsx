@@ -65,3 +65,16 @@ let predict (row : float []) =
 let targetTags = headers.[20..]
 predict test.[0] |> Array.zip targetTags
 test.[0] |> split |> snd
+
+//---------- Percentage correct recommendations
+let validation =
+    test
+    |> Array.map (fun obs ->
+        let actual = obs |> split |> snd
+        let predicted = obs |> predict
+        let recommended, observed =
+            Array.zip predicted actual
+            |> Array.maxBy fst
+        if observed > 0. then 1. else 0.)
+    |> Array.average
+    |> printfn "Correct calls: %f"
