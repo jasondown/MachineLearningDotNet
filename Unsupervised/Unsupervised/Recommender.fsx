@@ -78,3 +78,20 @@ let validation =
         if observed > 0. then 1. else 0.)
     |> Array.average
     |> printfn "Correct calls: %f"
+
+//----------Naive recommendation accuracy
+let averages = [|
+    for i in 20 .. 29 ->
+        train |> Array.averageBy (fun row -> row.[i]) |]
+
+let baseline =
+    test
+    |> Array.map (fun obs ->
+        let actual = obs |> split |> snd
+        let predicted = averages
+        let recommended, observed =
+            Array.zip predicted actual
+            |> Array.maxBy fst
+        if observed > 0. then 1. else 0.)
+    |> Array.average
+    |> printfn "Correct calls (Baseline): %f"
