@@ -31,3 +31,6 @@ let distance (row1 : float []) (row2 : float []) =
     (row1, row2)
     ||> Array.map2 (fun x y -> pown (x - y) 2)
     |> Array.sum
+
+let similarity (row1 : float []) (row2 : float []) =
+    1. / (1. + distance row1 row2)
