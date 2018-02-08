@@ -17,3 +17,12 @@ dataset.Rows
 |> Seq.averageBy (fun passenger ->
     if passenger.Survived then 1.0 else 0.0)
 |> printfn "Chances of survival: %.3f"
+
+//----------Exploring survival rates for different groups.
+let survivalRate (passengers : Passenger seq) = 
+    let total = passengers |> Seq.length
+    let survivors =
+        passengers
+        |> Seq.filter (fun p -> p.Survived)
+        |> Seq.length
+    100. * (float survivors / float total)
