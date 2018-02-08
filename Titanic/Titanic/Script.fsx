@@ -87,4 +87,19 @@ let survivalByFarePrice =
     |> Seq.groupBy (fun p -> p.Fare)
     |> Seq.iter (fun (price, passengers) ->
         printfn "%6.2F: %6.2f" price (survivalRate passengers))
-        
+
+//----------Discretization of fare prices
+let averageFare =
+    dataset.Rows
+    |> Seq.averageBy (fun p -> p.Fare)
+
+let fareLevel (p : Passenger) =
+    if p.Fare < averageFare
+    then "Cheap"
+    else "Expensive"
+let fareClassifier = survived |> learn (dataset.Rows) fareLevel
+
+printfn "Stump: Classify based on fare level."
+dataset.Rows
+|> Seq.averageBy (fun p -> 
+    if p.Survived = fareClassifier p then 1.0 else 0.0)
