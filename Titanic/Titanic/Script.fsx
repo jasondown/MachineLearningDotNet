@@ -35,3 +35,10 @@ bySex
 |> Seq.iter (fun (s, g) ->
     printfn "Sex %A: %f" s (survivalRate g))
 
+let byClass =
+    dataset.Rows
+    |> Seq.groupBy (fun p -> p.Pclass)
+
+byClass
+|> Seq.iter (fun (s, g) ->
+    printfn "Class %A: %f" s (survivalRate g))
