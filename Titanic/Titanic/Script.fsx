@@ -103,3 +103,11 @@ printfn "Stump: Classify based on fare level."
 dataset.Rows
 |> Seq.averageBy (fun p -> 
     if p.Survived = fareClassifier p then 1.0 else 0.0)
+
+//----------Exploring features with missing data. Port of origin.
+let survivalByPortOfOrigin =
+    dataset.Rows
+    |> Seq.groupBy (fun p -> p.Embarked)
+    |> Seq.iter (fun (port, passengers) ->
+        printfn "%s: %f" port (survivalRate passengers))
+
