@@ -72,3 +72,11 @@ printfn "Stump: Classify based on passenger sex."
 dataset.Rows
 |> Seq.averageBy (fun p -> 
     if p.Survived = sexClassifier p then 1.0 else 0.0)
+
+//----------Train and evaluate stump with multiple prongs
+let classClassifier = survived |> learn (dataset.Rows) (fun p -> p.Pclass)
+
+printfn "Stump: Classifiy based on passenger class (3 pronged)"
+dataset.Rows
+|> Seq.averageBy (fun p -> 
+    if p.Survived = classClassifier p then 1.0 else 0.0)
