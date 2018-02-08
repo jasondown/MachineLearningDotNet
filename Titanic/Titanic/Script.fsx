@@ -111,3 +111,40 @@ let survivalByPortOfOrigin =
     |> Seq.iter (fun (port, passengers) ->
         printfn "%s: %f" port (survivalRate passengers))
 
+//----------Incorporating missing values
+let hasData extractFeature = extractFeature >> Option.isSome
+
+let betterLearn sample extractFeature extractLabel =
+    let branches =
+        sample
+        |> Seq.filter (extractFeature |> hasData)
+        |> Seq.map (fun obs -> extractFeature obs |> Option.get, extractLabel obs)
+        |> Seq.groupBy fst
+        |> Seq.map (fun (feat, group) -> feat, mostFrequentLabelIn group)
+        |> Map.ofSeq
+    let labelFormMissingValues =
+        sample
+        |> Seq.countBy extractLabel
+        |> Seq.maxBy snd
+        |> fst
+    let classifier obs = 
+        let featureValue = extractFeature obs
+        match featureValue with
+        | None -> labelFormMissingValues
+        | Some (value) ->
+            match (branches.TryFind value) with
+            | None -> labelFormMissingValues
+            | Some (predictedLabel) -> predictedLabel
+    classifier
+
+let port (p : Passenger) =
+    match p.Embarked with
+    | "" -> None
+    | e -> Some e
+
+let updatedClassifier = survived |> betterLearn (dataset.Rows) port
+
+printfn "Stump: Classify based on port of origin (optional value)."
+dataset.Rows
+|> Seq.averageBy (fun p -> 
+    if p.Survived = updatedClassifier p then 1.0 else 0.0)
