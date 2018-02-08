@@ -26,3 +26,12 @@ let survivalRate (passengers : Passenger seq) =
         |> Seq.filter (fun p -> p.Survived)
         |> Seq.length
     100. * (float survivors / float total)
+
+let bySex =
+    dataset.Rows
+    |> Seq.groupBy (fun p -> p.Sex)
+
+bySex
+|> Seq.iter (fun (s, g) ->
+    printfn "Sex %A: %f" s (survivalRate g))
+
