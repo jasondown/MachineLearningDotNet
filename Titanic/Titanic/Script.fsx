@@ -80,3 +80,11 @@ printfn "Stump: Classifiy based on passenger class (3 pronged)"
 dataset.Rows
 |> Seq.averageBy (fun p -> 
     if p.Survived = classClassifier p then 1.0 else 0.0)
+
+//----------Feature with continuous numeric values (fare)
+let survivalByFarePrice =
+    dataset.Rows 
+    |> Seq.groupBy (fun p -> p.Fare)
+    |> Seq.iter (fun (price, passengers) ->
+        printfn "%6.2F: %6.2f" price (survivalRate passengers))
+        
