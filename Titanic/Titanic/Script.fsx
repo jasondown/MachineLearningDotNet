@@ -62,3 +62,13 @@ let learn sample extractFeature extractLabel =
         |> Seq.find (fun (f, _) -> f = featureValue)
         |> snd
     classifier
+
+//----------Train and evaluate the stump
+let survived (p : Passenger) = p.Survived
+let sex (p : Passenger) = p.Sex
+let sexClassifier = survived |> learn (dataset.Rows) sex
+
+printfn "Stump: Classify based on passenger sex."
+dataset.Rows
+|> Seq.averageBy (fun p -> 
+    if p.Survived = sexClassifier p then 1.0 else 0.0)
