@@ -42,3 +42,23 @@ let byClass =
 byClass
 |> Seq.iter (fun (s, g) ->
     printfn "Class %A: %f" s (survivalRate g))
+
+//----------Decision Stump
+let mostFrequentLabelIn group =
+    group
+    |> Seq.countBy snd
+    |> Seq.maxBy snd
+    |> fst
+
+let learn sample extractFeature extractLabel =
+    let groups =
+        sample
+        |> Seq.map (fun obs -> extractFeature obs, extractLabel obs)
+        |> Seq.groupBy fst
+        |> Seq.map (fun (feat, group) -> feat, mostFrequentLabelIn group)
+    let classifier obs =
+        let featureValue = extractFeature obs
+        groups 
+        |> Seq.find (fun (f, _) -> f = featureValue)
+        |> snd
+    classifier
