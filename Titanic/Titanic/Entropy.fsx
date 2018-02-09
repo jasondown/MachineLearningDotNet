@@ -54,9 +54,9 @@ let infoGain feature = dataset.Rows |> splitEntropy survived feature
 printfn "Comparsion: Most informatin feature"
 printfn "Base entropy %.3f" h
 
-InformationGain sex     |> printfn " Sex: %.3f"
-InformationGain pclass  |> printfn " Class: %.3f"
-InformationGain port    |> printfn " Port: %.3f"
-InformationGain age     |> printfn " Age: %.3f"
+infoGain sex     |> printfn " Sex: %.3f"
+infoGain pclass  |> printfn " Class: %.3f"
+infoGain port    |> printfn " Port: %.3f"
+infoGain age     |> printfn " Age: %.3f"
 
-//----------Compare information gain
+//----------Compare information gain in sub groups
