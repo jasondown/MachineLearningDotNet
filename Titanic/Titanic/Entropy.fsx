@@ -43,10 +43,23 @@ let port (p : Passenger) =
     | "" -> None
     | e  -> Some e
 
+//----------Use entropy to decide best age value for discretization
+let ages = dataset.Rows |> Seq.map (fun p -> p.Age) |> Seq.distinct
+let bestAge =
+    ages
+    |> Seq.minBy (fun age ->
+        let age (p : Passenger) =
+            if p.Age < age then Some "Younger" else Some "Older"
+        dataset.Rows |> splitEntropy survived age)
+
+printfn "Best age split: %.3f" bestAge
+
+// TODO: Explore minimum description length
+
 let age (p : Passenger) =
     match p.Age with
-    | a when a < 12.0 -> Some "Younger"
-    | _               -> Some "Older"
+    | a when a < bestAge -> Some "Younger"
+    | _                  -> Some "Older"
 
 let h = dataset.Rows |> entropy survived
 let infoGain feature = dataset.Rows |> splitEntropy survived feature
@@ -72,16 +85,3 @@ for (groupName, group) in bySex do
     infoGain pclass  |> printfn " Class: %.3f"
     infoGain port    |> printfn " Port: %.3f"
     infoGain age     |> printfn " Age: %.3f" 
-
-//----------Use entropy to decide best age value for discretization
-let ages = dataset.Rows |> Seq.map (fun p -> p.Age) |> Seq.distinct
-let bestAge =
-    ages
-    |> Seq.minBy (fun age ->
-        let age (p : Passenger) =
-            if p.Age < age then Some "Younger" else Some "Older"
-        dataset.Rows |> splitEntropy survived age)
-
-printfn "Best age split: %.3f" bestAge
-
-// TODO: Explore minimum description length
