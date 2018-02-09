@@ -148,25 +148,3 @@ printfn "Stump: Classify based on port of origin (optional value)."
 dataset.Rows
 |> Seq.averageBy (fun p -> 
     if p.Survived = updatedClassifier p then 1.0 else 0.0)
-
-//----------Shannon Entropy
-let entropy label data =
-    let size = data |> Seq.length
-    data
-    |> Seq.countBy label
-    |> Seq.map (fun (_, count) -> float count / float size)
-    |> Seq.sumBy (fun f -> if f > 0. then - f * log f else 0.)
-
-//---------- Average entropy after feature split
-let splitEntropy extractLabel extractFeature data =
-    let dataWithValues =
-        data
-        |> Seq.filter (extractFeature |> hasData)
-    let size = dataWithValues |> Seq.length
-    dataWithValues
-    |> Seq.groupBy extractFeature
-    |> Seq.sumBy (fun (_, group) ->
-        let groupSize = group |> Seq.length
-        let probaGroup = float groupSize / float size
-        let groupEntropy = group |> entropy extractLabel
-        probaGroup * groupEntropy)
