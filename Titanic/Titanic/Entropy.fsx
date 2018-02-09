@@ -60,3 +60,15 @@ infoGain port    |> printfn " Port: %.3f"
 infoGain age     |> printfn " Age: %.3f"
 
 //----------Compare information gain in sub groups
+let bySex = dataset.Rows |> Seq.groupBy sex
+
+for (groupName, group) in bySex do
+    printfn "Group : %s" groupName.Value
+    let h = group |> entropy survived
+    printfn "Base entropy %.3f" h
+
+    let infoGain feature = group |> splitEntropy survived feature
+    infoGain sex     |> printfn " Sex: %.3f"
+    infoGain pclass  |> printfn " Class: %.3f"
+    infoGain port    |> printfn " Port: %.3f"
+    infoGain age     |> printfn " Age: %.3f" 
