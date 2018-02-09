@@ -33,4 +33,28 @@ let splitEntropy extractLabel extractFeature data =
         probaGroup * groupEntropy)
 
 //----------Information Gain for different features
-let survived (p : Passenger) = p.Survived
+// NOTE: Made the all options for consistency and featureGain function below
+let survived (p : Passenger) = Some p.Survived
+let sex (p : Passenger)      = Some p.Sex
+let pclass (p : Passenger)   = Some p.Pclass
+
+let port (p : Passenger) =
+    match p.Embarked with
+    | "" -> None
+    | e  -> Some e
+
+let age (p : Passenger) =
+    match p.Age with
+    | a when a < 12.0 -> Some "Younger"
+    | _               -> Some "Older"
+
+let h = dataset.Rows |> entropy survived
+let featureGain feature = dataset.Rows |> splitEntropy survived feature
+
+printfn "Comparsion: Most informatin feature"
+printfn "Base entropy %.3f" h
+
+featureGain sex     |> printfn " Sex: %.3f"
+featureGain pclass  |> printfn " Class: %.3f"
+featureGain port    |> printfn " Port: %.3f"
+featureGain age     |> printfn " Age: %.3f"
