@@ -52,7 +52,7 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="Library1.fs" />
+    <Compile Include="Tree.fs" />
     <None Include="Script.fsx" />
     <None Include="Entropy.fsx" />
     <Content Include="packages.config" />
