@@ -23,3 +23,14 @@ let tree = growTree dataset.Rows label (features |> Map.ofList)
 
 dataset.Rows
 |> Seq.averageBy (fun p -> if p.Survived = decide tree p then 1. else 0.)
+
+let rec display depth tree =
+    let padding = String.replicate (2 * depth) " "
+    match tree with
+    | Answer label -> printfn " -> %A" label
+    | Stump ((name, _), _, branches) ->
+        printfn ""
+        branches
+        |> Seq.iter (fun kv ->
+            printf "%s ? %s : %s" padding name kv.Key
+            display (depth + 1) kv.Value)
