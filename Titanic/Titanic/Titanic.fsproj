@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Tree.fs" />
+    <None Include="Tree-Test.fsx" />
     <None Include="Script.fsx" />
     <None Include="Entropy.fsx" />
     <Content Include="packages.config" />

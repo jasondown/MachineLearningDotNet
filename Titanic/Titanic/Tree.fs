@@ -81,3 +81,59 @@ module Tree =
                 |> Map.ofSeq
 
             Stump((bestName, bestFeature), defaultValue, nextLevel)
+
+    let rec display depth tree =
+        let padding = String.replicate (2 * depth) " "
+        match tree with
+        | Answer label -> printfn " -> %A" label
+        | Stump ((name, _), _, branches) ->
+            printfn ""
+            branches
+            |> Seq.iter (fun kv ->
+                printf "%s ? %s : %s" padding name kv.Key
+                display (depth + 1) kv.Value)
+
+//----------Avoid over-fitting. Inject feature filters.
+    let entropyGainFilter sample label feature =
+        splitEntropy label feature sample - entropy label sample < 0.
+
+    let leafSizeFilter minSize sample label feature =
+        sample
+        |> Seq.map feature
+        |> Seq.choose id
+        |> Seq.countBy id
+        |> Seq.forall (fun (_, groupSize) -> groupSize > minSize)
+
+    let rec growTree2 filters sample label features = 
+
+        let features =
+            features
+            |> Map.filter (fun name feature -> 
+                filters |> Seq.forall (fun filter -> filter sample label feature)) 
+
+        if (Map.isEmpty features)
+        then sample |> mostFrequentBy label |> Answer
+        else
+            let (bestName, bestFeature) = 
+                features
+                |> Seq.minBy (fun kv -> 
+                    splitEntropy label kv.Value sample)
+                |> (fun kv -> kv.Key, kv.Value)
+            let branches = 
+                sample
+                |> Seq.groupBy bestFeature
+                |> Seq.filter (fun (value, group) -> value.IsSome)
+                |> Seq.map (fun (value, group) -> value.Value,group)
+            let defaultValue = 
+                branches 
+                |> Seq.maxBy (fun (value, group) -> 
+                    group |> Seq.length)
+                |> fst
+            let remainingFeatures = features |> Map.remove bestName
+            let nextLevel = 
+                branches 
+                |> Seq.map (fun (value, group) -> 
+                    value, growTree2 filters group label remainingFeatures)
+                |> Map.ofSeq
+
+            Stump((bestName, bestFeature), defaultValue, nextLevel)
