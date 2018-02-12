@@ -5,6 +5,7 @@
 open FSharp.Data
 open Titanic
 open Titanic.Tree
+open System.Drawing
 
 type Titanic = CsvProvider<"titanic.csv">
 type Passenger = Titanic.Row 
@@ -27,3 +28,20 @@ display 0 tree
 
 growTree2 [ entropyGainFilter; leafSizeFilter 10 ] dataset.Rows label (features |> Map.ofList)
 |> display 0
+
+//---------- K-Fold (Generating k training/validation pairs to prevent over-fitting
+let kfold k sample =
+    let size = sample |> Array.length
+    let foldSize = size / k
+
+    [ for f in 0 .. (k-1) do
+        let sliceStart = f * foldSize
+        let sliceEnd = f * foldSize + foldSize - 1
+        let validation = sample.[sliceStart .. sliceEnd]
+        let training =
+            [|
+                for i in 0 .. (sliceStart - 1) do yield sample.[i]
+                for i in (sliceEnd + 1) .. (size - 1) do yield sample.[i]
+            |]
+        yield training, validation
+    ]
