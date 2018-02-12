@@ -5,7 +5,6 @@
 open FSharp.Data
 open Titanic
 open Titanic.Tree
-open System.Drawing
 
 type Titanic = CsvProvider<"titanic.csv">
 type Passenger = Titanic.Row 
@@ -60,6 +59,28 @@ let evaluateFolds =
         let tree = growTree2 filters training label features
         let accuracyTraining = accuracy tree training
         let accuracyValidation = accuracy tree validation
+
+        printfn "Training: %.3f, Valdation: %.3f" accuracyTraining accuracyValidation
+        accuracyTraining, accuracyValidation ]
+
+//----------Train a forest of 1,000 trees (each time using a slightly different combination of features and
+//          observations), and then compute the algorithm’s accuracy on both the training and validation sets.
+let forestFeatures = [
+    "Sex", fun (p : Passenger) -> p.Sex |> Some
+    "Class", fun p -> p.Pclass |> string |> Some
+    "Age", fun p -> if p.Age < 7.0 then Some "Younger" else Some "Older"
+    "Port", fun p -> if p.Embarked = "" then None else Some p.Embarked
+]
+
+let forestResults () =
+    let accuracy predictor (sample : Passenger seq) =
+        sample|> Seq.averageBy (fun p ->
+            if p.Survived = predictor p then 1.0 else 0.0)
+
+    [ for (training, validation) in folds ->
+        let forest = growForest 1000 training label forestFeatures
+        let accuracyTraining = accuracy forest training
+        let accuracyValidation = accuracy forest validation
 
         printfn "Training: %.3f, Valdation: %.3f" accuracyTraining accuracyValidation
         accuracyTraining, accuracyValidation ]
