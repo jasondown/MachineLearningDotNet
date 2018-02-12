@@ -45,3 +45,21 @@ let kfold k sample =
             |]
         yield training, validation
     ]
+
+//----------Evaluation 10 folds
+let folds = dataset.Rows |> Seq.toArray |> kfold 10
+let accuracy tree (sample : Passenger seq) =
+    sample
+    |> Seq.averageBy (fun p ->
+        if p.Survived = decide tree p then 1.0 else 0.0)
+
+let evaluateFolds =
+    let filters = [ leafSizeFilter 10; entropyGainFilter ]
+    let features = features |> Map.ofList
+    [ for (training, validation) in folds ->
+        let tree = growTree2 filters training label features
+        let accuracyTraining = accuracy tree training
+        let accuracyValidation = accuracy tree validation
+
+        printfn "Training: %.3f, Valdation: %.3f" accuracyTraining accuracyValidation
+        accuracyTraining, accuracyValidation ]
